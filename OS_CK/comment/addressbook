@@ -1,0 +1,226 @@
+#!/bin/bash
+# -------------------------------------------
+# 🧠 Address Book Management System (Bash)
+# -------------------------------------------
+
+# The file used to store all address book records
+FILE="addressbook.txt"
+
+# ---------------- FUNCTION DEFINITIONS ---------------- #
+
+# Function 1️⃣: Create Address Book
+createAddressBook() {
+    # Check if file already exists
+    if [ -e "$FILE" ]; then
+        echo "Address book already exists."
+    else
+        # Create new address book file
+        touch "$FILE"
+        echo "Address book created."
+    fi
+}
+
+# Function 2️⃣: View Address Book
+viewAddressBook() {
+    # If file does not exist or is empty
+    if [ ! -s "$FILE" ]; then
+        echo "Address book is empty or does not exist."
+    else
+        # Display contents of address book
+        echo "---- Address Book ----"
+        cat "$FILE"
+    fi
+}
+
+# Function 3️⃣: Insert a New Record
+insertRecord() {
+    echo "Enter record in format: LastName,FirstName,Email,Phone"
+    read record
+    # Append record to file
+    echo "$record" >> "$FILE"
+    echo "Record inserted."
+}
+
+# Function 4️⃣: Delete a Record
+deleteRecord() {
+    # Check if address book exists and has data
+    if [ ! -s "$FILE" ]; then
+        echo "Address book is empty or does not exist."
+        return
+    fi
+
+    echo "Enter a search string (e.g. name or email) to find the record to delete:"
+    read search
+
+    # grep -n shows matching lines with line numbers
+    matches=$(grep -n "$search" "$FILE")
+
+    if [ -z "$matches" ]; then
+        echo "No matching records found."
+        return
+    fi
+
+    # Display matching records with line numbers
+    echo "$matches"
+    echo "Enter line number to delete:"
+    read line
+
+    # sed -i deletes the selected line number directly in the file
+    sed -i "${line}d" "$FILE"
+    echo "Record deleted."
+}
+
+# Function 5️⃣: Modify a Record
+modifyRecord() {
+    if [ ! -s "$FILE" ]; then
+        echo "Address book is empty or does not exist."
+        return
+    fi
+
+    echo "Enter a search string (e.g. name or email) to find the record to modify:"
+    read search
+
+    matches=$(grep -n "$search" "$FILE")
+
+    if [ -z "$matches" ]; then
+        echo "No matching records found."
+        return
+    fi
+
+    # Display possible matches with line numbers
+    echo "$matches"
+    echo "Enter line number to modify:"
+    read line
+
+    echo "Enter new record (LastName,FirstName,Email,Phone):"
+    read newRecord
+
+    # sed replaces the line content using substitution
+    sed -i "${line}s/.*/$newRecord/" "$FILE"
+    echo "Record modified."
+}
+
+# Function 6️⃣: Exit Program
+exitProgram() {
+    echo "Exiting... Goodbye!"
+    exit 0
+}
+
+# ---------------- MAIN MENU LOOP ---------------- #
+
+# Infinite menu until user exits
+while true; do
+    echo "=============================="
+    echo "     Address Book Menu"
+    echo "=============================="
+    echo "1. Create Address Book"
+    echo "2. View Address Book"
+    echo "3. Insert a Record"
+    echo "4. Delete a Record"
+    echo "5. Modify a Record"
+    echo "6. Exit"
+    echo "=============================="
+    echo -n "Enter your choice: "
+    read choice
+
+    # Choose appropriate function based on user input
+    case $choice in
+        1) createAddressBook ;;  # Create address book
+        2) viewAddressBook ;;    # View address book
+        3) insertRecord ;;       # Insert new record
+        4) deleteRecord ;;       # Delete a record
+        5) modifyRecord ;;       # Modify a record
+        6) exitProgram ;;        # Exit script
+        *) echo "Invalid choice. Please select 1-6." ;;  # Invalid input handling
+    esac
+done
+
+
+: '
+------------------------------------------------------------
+📘 SHELL SCRIPT DOCUMENTATION — ADDRESS BOOK MANAGEMENT SYSTEM
+------------------------------------------------------------
+
+🔹 PURPOSE:
+   This is a **menu-driven shell script** that performs CRUD (Create, Read, Update, Delete)
+   operations on a text-based address book file named **addressbook.txt**.
+
+------------------------------------------------------------
+⚙️ ALGORITHM / LOGIC USED:
+
+1️⃣ **Create File**
+   ➤ Checks if addressbook.txt exists.
+   ➤ If not, creates it using `touch`.
+
+2️⃣ **View Records**
+   ➤ Uses `cat` to display contents if the file is not empty.
+
+3️⃣ **Insert Record**
+   ➤ Accepts input in the format:
+       LastName,FirstName,Email,Phone
+   ➤ Appends the record to addressbook.txt using `>>`.
+
+4️⃣ **Delete Record**
+   ➤ Searches for a matching string using `grep -n` (shows line numbers).
+   ➤ User selects which line to delete.
+   ➤ Deletes that line using `sed -i "${line}d"`.
+
+5️⃣ **Modify Record**
+   ➤ Finds matching records using `grep -n`.
+   ➤ User selects line number to modify.
+   ➤ Replaces that line with new record using `sed -i "${line}s/.*/$newRecord/"`.
+
+6️⃣ **Exit Program**
+   ➤ Prints exit message and stops execution using `exit 0`.
+
+------------------------------------------------------------
+📊 EXAMPLE INPUT / OUTPUT:
+
+Example Run:
+---------------
+$ bash addressbook.sh
+
+==============================
+     Address Book Menu
+==============================
+1. Create Address Book
+2. View Address Book
+3. Insert a Record
+4. Delete a Record
+5. Modify a Record
+6. Exit
+==============================
+Enter your choice: 1
+Address book created.
+
+Enter your choice: 3
+Enter record in format: LastName,FirstName,Email,Phone
+Doe,John,john.doe@example.com,9876543210
+Record inserted.
+
+Enter your choice: 2
+---- Address Book ----
+Doe,John,john.doe@example.com,9876543210
+
+Enter your choice: 5
+Enter a search string (e.g. name or email) to find the record to modify:
+John
+1:Doe,John,john.doe@example.com,9876543210
+Enter line number to modify:
+1
+Enter new record (LastName,FirstName,Email,Phone):
+Doe,Johnny,johnny.doe@example.com,9998887777
+Record modified.
+
+Enter your choice: 6
+Exiting... Goodbye!
+
+------------------------------------------------------------
+✅ SUMMARY:
+   ➤ Script Type: Menu-driven Bash Script
+   ➤ File Used: addressbook.txt
+   ➤ Major Commands: cat, grep, sed, read, touch, if-else, case
+   ➤ Operations: Create, View, Insert, Delete, Modify
+   ➤ Goal: Manage an address book directly from terminal efficiently.
+------------------------------------------------------------
+'

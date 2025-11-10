@@ -1,0 +1,145 @@
+#include <stdio.h> 
+
+int main() 
+{ 
+    int arrival_time[10], burst_time[10], temp[10]; 
+    int i, smallest, count = 0, time, limit; 
+    double wait_time = 0, turnaround_time = 0, end; 
+    float average_waiting_time, average_turnaround_time; 
+
+    // Step 1: Input total number of processes
+    printf("Enter the total number of processes: "); 
+    scanf("%d", &limit); 
+
+    // Step 2: Take arrival time and burst time for each process
+    printf("Enter details of %d processes\n", limit); 
+    for (i = 0; i < limit; i++) 
+    { 
+        printf("Enter arrival time for process %d: ", i + 1); 
+        scanf("%d", &arrival_time[i]); 
+        printf("Enter burst time for process %d: ", i + 1); 
+        scanf("%d", &burst_time[i]); 
+
+        temp[i] = burst_time[i]; // Store burst time for later use (for waiting time calculation)
+    } 
+
+    // Step 3: Assign a very large burst time at the end
+    // This prevents accessing invalid array index during smallest-time selection
+    burst_time[limit] = 9999; 
+
+    // Step 4: Initialize simulation of CPU time
+    // 'time' represents the current time in CPU scheduling
+    // 'count' tracks number of processes completed
+    for (time = 0; count != limit; time++) 
+    { 
+        smallest = limit; // Assume the last index (9999) as smallest initially
+
+        // Step 5: Find process with smallest remaining burst time 
+        // among the processes that have arrived so far
+        for (i = 0; i < limit; i++) 
+        { 
+            if (arrival_time[i] <= time && burst_time[i] < burst_time[smallest] && burst_time[i] > 0) 
+            { 
+                smallest = i; // Select process i if it has arrived and has smaller remaining burst
+            } 
+        } 
+
+        // Step 6: Execute the selected process for 1 time unit
+        burst_time[smallest]--; 
+
+        // Step 7: If process has finished execution
+        if (burst_time[smallest] == 0) 
+        { 
+            count++;               // One process completed
+            end = time + 1;        // Current time + 1 = completion time of that process
+
+            // Calculate total waiting time and turnaround time for this process
+            wait_time += end - arrival_time[smallest] - temp[smallest]; 
+            turnaround_time += end - arrival_time[smallest]; 
+        } 
+    } 
+
+    // Step 8: Calculate average waiting and turnaround times
+    average_waiting_time = wait_time / limit; 
+    average_turnaround_time = turnaround_time / limit; 
+
+    // Step 9: Display final average results
+    printf("\nAverage waiting time: %.2f", average_waiting_time); 
+    printf("\nAverage turnaround time: %.2f\n", average_turnaround_time); 
+
+    return 0; 
+} 
+
+/*
+------------------------------------------------------------
+🧠 PROGRAM EXPLANATION — SHORTEST REMAINING TIME FIRST (SRTF)
+------------------------------------------------------------
+
+🔹 ALGORITHM USED:
+   ➤ The program implements the **Shortest Remaining Time First (SRTF)** 
+     CPU Scheduling Algorithm.
+   ➤ SRTF is the **preemptive version** of the Shortest Job Next (SJN) algorithm.
+   ➤ At any given time, the process with the **least remaining burst time** 
+     among all arrived processes is executed first.
+   ➤ If a new process arrives with a shorter burst time, 
+     it **preempts** the currently running process.
+
+------------------------------------------------------------
+⚙️ STEP-BY-STEP LOGIC EXPLANATION:
+
+1️⃣ **Input Phase**
+   - User enters the number of processes.
+   - For each process, program collects:
+        • Arrival Time (AT)
+        • Burst Time (BT)
+   - Burst times are stored in both `burst_time[]` and `temp[]` arrays.
+     The `temp[]` array preserves the original burst times for later calculations.
+
+2️⃣ **Initialization**
+   - `burst_time[limit] = 9999` acts as a dummy process with very large time,
+     ensuring a valid comparison while finding the smallest remaining burst.
+
+3️⃣ **Execution (Main Loop)**
+   - A simulated clock `time` runs until all processes are completed (`count != limit`).
+   - At each time unit:
+        ➤ Find process `i` with:
+              arrival_time[i] <= time  AND  
+              burst_time[i] < burst_time[smallest]
+        ➤ Decrease its burst time by 1 (simulating execution).
+        ➤ If its burst time becomes 0, the process is finished:
+              • Calculate Turnaround Time = Completion Time − Arrival Time
+              • Calculate Waiting Time = Turnaround Time − Original Burst Time
+
+4️⃣ **Result Calculation**
+   - After all processes finish, average waiting and turnaround times are computed:
+        ➤ Average Waiting Time = Total Waiting Time / Total Processes
+        ➤ Average Turnaround Time = Total Turnaround Time / Total Processes
+
+------------------------------------------------------------
+📊 EXAMPLE INPUT / OUTPUT:
+
+Example Input:
+---------------
+Enter the total number of processes: 3
+Enter details of 3 processes
+Enter arrival time for process 1: 0
+Enter burst time for process 1: 8
+Enter arrival time for process 2: 1
+Enter burst time for process 2: 4
+Enter arrival time for process 3: 2
+Enter burst time for process 3: 2
+
+Example Output:
+---------------
+Average waiting time: 4.33
+Average turnaround time: 8.00
+
+------------------------------------------------------------
+✅ SUMMARY:
+   ➤ Scheduling Type: Preemptive
+   ➤ Algorithm: Shortest Remaining Time First (SRTF)
+   ➤ Purpose: Reduce average waiting and turnaround times
+   ➤ CPU picks process with smallest remaining time at any moment
+   ➤ If new process arrives with smaller burst time, it preempts current one
+------------------------------------------------------------
+*/

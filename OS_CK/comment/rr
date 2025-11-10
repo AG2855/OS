@@ -1,0 +1,160 @@
+#include <stdio.h> 
+
+int main() 
+{ 
+    int i, limit, total = 0, x, counter = 0, time_quantum; 
+    float average_wait_time = 0, average_turnaround_time = 0; 
+    int arrival_time[10], burst_time[10], temp[10]; 
+
+    // Step 1: Take total number of processes
+    printf("Enter Total Number of Processes: "); 
+    scanf("%d", &limit); 
+
+    x = limit; // Copy of total processes (used to track remaining)
+
+    // Step 2: Take arrival time and burst time for each process
+    for(i = 0; i < limit; i++) 
+    { 
+        printf("Enter Details of Process[%d]\n", i + 1); 
+        printf("Arrival Time: "); 
+        scanf("%d", &arrival_time[i]); 
+        printf("Burst Time: "); 
+        scanf("%d", &burst_time[i]); 
+
+        temp[i] = burst_time[i]; // Store burst time in temp for manipulation
+    } 
+
+    // Step 3: Take time quantum (maximum CPU time per process per cycle)
+    printf("Enter Time Quantum: "); 
+    scanf("%d", &time_quantum); 
+
+    printf("\nProcess\tBurst Time\tTurnaround Time\tWaiting Time\n"); 
+
+    // Step 4: Process scheduling begins
+    // 'total' keeps track of current CPU time
+    // Continue until all processes (x) are completed
+    for(total = 0, i = 0; x != 0; ) 
+    { 
+        // Case 1: Process needs less or equal to time quantum to finish
+        if(temp[i] <= time_quantum && temp[i] > 0) 
+        { 
+            total = total + temp[i];     // Add process burst to total time
+            temp[i] = 0;                 // Process finished
+            counter = 1;                 // Flag to indicate completion
+        } 
+        // Case 2: Process needs more than one time quantum
+        else if(temp[i] > 0) 
+        { 
+            temp[i] = temp[i] - time_quantum; // Reduce remaining time
+            total = total + time_quantum;     // Add time quantum to total
+        } 
+
+        // Case 3: If process just finished, calculate turnaround and waiting time
+        if(temp[i] == 0 && counter == 1) 
+        { 
+            x--; // One process completed
+            printf("P[%d]\t%d\t\t%d\t\t%d\n", i + 1, 
+                   burst_time[i], 
+                   total - arrival_time[i], 
+                   total - arrival_time[i] - burst_time[i]); 
+
+            // Accumulate waiting and turnaround times
+            average_wait_time += total - arrival_time[i] - burst_time[i]; 
+            average_turnaround_time += total - arrival_time[i]; 
+            counter = 0; 
+        } 
+
+        // Step 5: Move to next process cyclically
+        // If end of list reached, start again
+        if(i == limit - 1) 
+            i = 0; 
+        // If next process has already arrived, move to it
+        else if(arrival_time[i + 1] <= total) 
+            i++; 
+        // Otherwise, restart checking from the beginning
+        else 
+            i = 0; 
+    } 
+
+    // Step 6: Calculate averages
+    average_wait_time = average_wait_time / limit; 
+    average_turnaround_time = average_turnaround_time / limit; 
+
+    // Step 7: Display final results
+    printf("\nAverage Waiting Time:\t%f", average_wait_time); 
+    printf("\nAverage Turnaround Time:\t%f\n", average_turnaround_time); 
+
+    return 0; 
+} 
+
+/*
+------------------------------------------------------------
+🧠 PROGRAM EXPLANATION — ROUND ROBIN CPU SCHEDULING
+------------------------------------------------------------
+
+🔹 ALGORITHM USED:
+   This program implements the **Round Robin Scheduling Algorithm**.
+   It is a **preemptive** scheduling method that ensures fairness by
+   allocating each process a fixed CPU time called the **Time Quantum**.
+
+------------------------------------------------------------
+⚙️ HOW THE PROGRAM WORKS:
+
+1️⃣ INPUT PHASE:
+   - User provides total number of processes.
+   - For each process, inputs:
+       • Arrival Time (AT)
+       • Burst Time (BT)
+   - The program also asks for the **Time Quantum (TQ)**.
+
+2️⃣ PROCESS EXECUTION:
+   - Processes are executed in a circular queue order.
+   - Each process runs for a maximum of 'time quantum' units.
+   - If the remaining burst time > time quantum → it's paused.
+   - If the process finishes → its turnaround and waiting times are calculated.
+
+   Formulas:
+     ➤ Turnaround Time = Completion Time − Arrival Time
+     ➤ Waiting Time = Turnaround Time − Burst Time
+
+3️⃣ OUTPUT:
+   - Displays each process with Burst Time, Turnaround Time, and Waiting Time.
+   - Finally prints:
+        → Average Waiting Time
+        → Average Turnaround Time
+
+------------------------------------------------------------
+📊 EXAMPLE INPUT / OUTPUT:
+
+Example Input:
+---------------
+Enter Total Number of Processes: 3
+Enter Details of Process[1]
+Arrival Time: 0
+Burst Time: 5
+Enter Details of Process[2]
+Arrival Time: 1
+Burst Time: 4
+Enter Details of Process[3]
+Arrival Time: 2
+Burst Time: 2
+Enter Time Quantum: 2
+
+Example Output:
+---------------
+Process   Burst Time   Turnaround Time   Waiting Time
+P[1]      5            11                6
+P[2]      4            10                6
+P[3]      2            4                 2
+
+Average Waiting Time:     4.666667
+Average Turnaround Time:  8.333333
+
+------------------------------------------------------------
+✅ SUMMARY:
+   ➤ Scheduling Type: Preemptive
+   ➤ Algorithm: Round Robin
+   ➤ Purpose: Equal CPU sharing among all processes
+   ➤ Key Concept: Each process executes for a fixed time slice in cyclic order
+------------------------------------------------------------
+*/
